@@ -1,0 +1,36 @@
+{
+  "id": "distractor-syntax-vs-logic-005",
+  "scorer": "grainSurveyScorer",
+  "notes": "Distractor: Syntax Error vs Logic/Naming Semantics. The teacher asks specifically about identifier naming rules. Student s-501 has a true conceptual naming error (thinks names can start with numbers or contain spaces). Students s-502 and s-503 have mechanical punctuation/syntax errors (missing parenthesis, indentation) which are distractors and must not be cited.",
+  "input": {
+    "question": "Who is struggling with variable naming rules and valid identifier syntax?",
+    "students": [
+      {
+        "id": "s-501",
+        "grains": [
+          { "text": "Believes variable names can begin with a number or contain spaces" }
+        ]
+      },
+      {
+        "id": "s-502",
+        "grains": [
+          { "text": "Frequently forgets closing parenthesis in print statement" }
+        ]
+      },
+      {
+        "id": "s-503",
+        "grains": [
+          { "text": "Inconsistent indentation spacing in code blocks" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-501"],
+    "mustMention": [
+      ["s-501", "501"],
+      ["variable", "name", "identifier", "number", "space"]
+    ],
+    "mustNotMention": ["s-502", "s-503", "parenthesis", "indentation"]
+  }
+}
