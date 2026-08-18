@@ -1,0 +1,30 @@
+{
+  "id": "polarity-loop-active-002",
+  "scorer": "grainSurveyScorer",
+  "notes": "Contrastive Polarity Pair 1 (Active Misconception): Tests whether the agent properly identifies an active student blocker (s-301) whose while loop never terminates due to missing increment. Student s-302 has an irrelevant slicing syntax question and must not be cited.",
+  "input": {
+    "question": "Which students are struggling with while loop termination?",
+    "students": [
+      {
+        "id": "s-301",
+        "grains": [
+          { "text": "Believes while loop terminates automatically without modifying loop variable in body" }
+        ]
+      },
+      {
+        "id": "s-302",
+        "grains": [
+          { "text": "Confused about string slicing syntax with negative indices" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-301"],
+    "mustMention": [
+      ["s-301", "301"],
+      ["loop", "while", "variable", "termination", "increment", "automatically"]
+    ],
+    "mustNotMention": ["s-302", "slicing"]
+  }
+}

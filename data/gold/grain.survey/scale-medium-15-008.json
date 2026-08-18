@@ -1,0 +1,34 @@
+{
+  "id": "scale-medium-15-008",
+  "scorer": "grainSurveyScorer",
+  "notes": "Scaling Curve (15 students): Classroom with 15 students. Only 2 students (s-803, s-811) have string type conversion issues. The remaining 13 students have diverse noise grains. Tests whether the agent can maintain high precision without leaking the 13 irrelevant students.",
+  "input": {
+    "question": "Who is having trouble with string concatenation and type conversion?",
+    "students": [
+      { "id": "s-801", "grains": [{ "text": "Mastered while loop condition increment" }] },
+      { "id": "s-802", "grains": [{ "text": "Understands boolean logic operators" }] },
+      { "id": "s-803", "grains": [{ "text": "Tries to add string and int directly without str() type conversion" }] },
+      { "id": "s-804", "grains": [{ "text": "Confuses single quotes with double quotes in comments" }] },
+      { "id": "s-805", "grains": [{ "text": "Uses proper indentation in for loops" }] },
+      { "id": "s-806", "grains": [{ "text": "Understands list indexing from 0" }] },
+      { "id": "s-807", "grains": [{ "text": "Trouble understanding recursion base case" }] },
+      { "id": "s-808", "grains": [{ "text": "Understands function return keyword" }] },
+      { "id": "s-809", "grains": [{ "text": "Misunderstands modulo operator remainder" }] },
+      { "id": "s-810", "grains": [{ "text": "Good grasp of variable assignment" }] },
+      { "id": "s-811", "grains": [{ "text": "Confuses int('5') conversion with calculating length of string" }] },
+      { "id": "s-812", "grains": [{ "text": "Uses descriptive variable names" }] },
+      { "id": "s-813", "grains": [{ "text": "Struggles with dictionary key-value lookup" }] },
+      { "id": "s-814", "grains": [{ "text": "Knows how to append items to a list" }] },
+      { "id": "s-815", "grains": [{ "text": "Understands break statements in loops" }] }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-803", "s-811"],
+    "mustMention": [
+      ["s-803", "803"],
+      ["s-811", "811"],
+      ["string", "conversion", "type", "str()", "int"]
+    ],
+    "mustNotMention": ["s-801", "s-802", "s-804", "s-805", "s-806", "s-807", "s-808", "s-809", "s-810", "s-812", "s-813", "s-814", "s-815"]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "zero-match-negative-004",
+  "scorer": "grainSurveyScorer",
+  "notes": "Zero-Match Query Mismatch (True Negative): The teacher asks about recursion and base cases, but the classroom's recorded grains are exclusively about variable assignment and output printing. The agent must return zero citations and explicitly state that no students are recorded having this difficulty.",
+  "input": {
+    "question": "Who has misconceptions regarding recursion and recursive base cases?",
+    "students": [
+      {
+        "id": "s-401",
+        "grains": [
+          { "text": "Confuses variable assignment with mathematical equality" }
+        ]
+      },
+      {
+        "id": "s-402",
+        "grains": [
+          { "text": "Attempts to print variable before declaring assignment" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": [],
+    "mustMention": [
+      ["no students", "none recorded", "no matches", "none found", "no one", "zero students", "no matching students"]
+    ],
+    "mustNotMention": ["s-401", "s-402"]
+  }
+}

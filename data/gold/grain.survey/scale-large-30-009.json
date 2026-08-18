@@ -1,0 +1,54 @@
+{
+  "id": "scale-large-30-009",
+  "scorer": "grainSurveyScorer",
+  "notes": "Scaling Stress Test (30 students): Stress tests classroom noise resistance with 30 students. Exactly 3 students (s-905, s-918, s-927) have return value misconceptions. The remaining 27 students have irrelevant grains or clean profiles. Citing any of the 27 irrelevant students is penalized.",
+  "input": {
+    "question": "Who is struggling with function return values versus print statements?",
+    "students": [
+      { "id": "s-901", "grains": [{ "text": "Mastered conditional if-elif-else branches" }] },
+      { "id": "s-902", "grains": [{ "text": "Confuses = and == in comparisons" }] },
+      { "id": "s-903", "grains": [{ "text": "Understands for loop range step argument" }] },
+      { "id": "s-904", "grains": [{ "text": "Understands list pop method" }] },
+      { "id": "s-905", "grains": [{ "text": "Believes print() inside a function returns a value back to caller variable" }] },
+      { "id": "s-906", "grains": [{ "text": "Confuses string length with last index" }] },
+      { "id": "s-907", "grains": [{ "text": "Understands boolean negation with not" }] },
+      { "id": "s-908", "grains": [{ "text": "Uses proper variable naming snake_case" }] },
+      { "id": "s-909", "grains": [{ "text": "Understands integer division // vs true division /" }] },
+      { "id": "s-910", "grains": [{ "text": "Mastered nested while loops" }] },
+      { "id": "s-911", "grains": [{ "text": "Understands string immutability" }] },
+      { "id": "s-912", "grains": [{ "text": "Struggles with dictionary key error on missing keys" }] },
+      { "id": "s-913", "grains": [{ "text": "Uses list comprehension effectively" }] },
+      { "id": "s-914", "grains": [{ "text": "Understands comments starting with #" }] },
+      { "id": "s-915", "grains": [{ "text": "Confuses append with extend on lists" }] },
+      { "id": "s-916", "grains": [{ "text": "Mastered basic input() prompt" }] },
+      { "id": "s-917", "grains": [{ "text": "Understands logical OR truth conditions" }] },
+      { "id": "s-918", "grains": [{ "text": "Writes code lines after return statement expecting them to execute" }] },
+      { "id": "s-919", "grains": [{ "text": "Understands float precision basics" }] },
+      { "id": "s-920", "grains": [{ "text": "Trouble understanding tuple immutability" }] },
+      { "id": "s-921", "grains": [{ "text": "Understands slicing with step parameter" }] },
+      { "id": "s-922", "grains": [{ "text": "Confuses global and local variable scope" }] },
+      { "id": "s-923", "grains": [{ "text": "Mastered string upper and lower methods" }] },
+      { "id": "s-924", "grains": [{ "text": "Understands break and continue keywords" }] },
+      { "id": "s-925", "grains": [{ "text": "Understands try-except block execution" }] },
+      { "id": "s-926", "grains": [{ "text": "Understands while loop condition checking" }] },
+      { "id": "s-927", "grains": [{ "text": "Assumes a function without a return statement returns 0 instead of None" }] },
+      { "id": "s-928", "grains": [{ "text": "Mastered string formatting with f-strings" }] },
+      { "id": "s-929", "grains": [{ "text": "Understands list sort vs sorted function" }] },
+      { "id": "s-930", "grains": [{ "text": "Understands recursion termination condition" }] }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-905", "s-918", "s-927"],
+    "mustMention": [
+      ["s-905", "905"],
+      ["s-918", "918"],
+      ["s-927", "927"],
+      ["return", "print", "none"]
+    ],
+    "mustNotMention": [
+      "s-901", "s-902", "s-903", "s-904", "s-906", "s-907", "s-908", "s-909", "s-910",
+      "s-911", "s-912", "s-913", "s-914", "s-915", "s-916", "s-917", "s-919", "s-920",
+      "s-921", "s-922", "s-923", "s-924", "s-925", "s-926", "s-928", "s-929", "s-930"
+    ]
+  }
+}

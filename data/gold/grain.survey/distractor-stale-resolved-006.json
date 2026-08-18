@@ -1,0 +1,30 @@
+{
+  "id": "distractor-stale-resolved-006",
+  "scorer": "grainSurveyScorer",
+  "notes": "Distractor: Stale/Resolved Historical Misconception vs Active Blocker. Student s-601 previously had 0-indexing confusion, but resolved it and now indexes correctly. Student s-602 has an active, unresolved misconception regarding negative indexing. The teacher asks who currently needs help with indexing, so only s-602 should be cited.",
+  "input": {
+    "question": "Who currently needs help understanding list indexing?",
+    "students": [
+      {
+        "id": "s-601",
+        "grains": [
+          { "text": "Previously confused 0-indexing with 1-indexing, but resolved with array diagram and now indexes correctly" }
+        ]
+      },
+      {
+        "id": "s-602",
+        "grains": [
+          { "text": "Thinks list[-1] accesses the second element from the start instead of the last element" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-602"],
+    "mustMention": [
+      ["s-602", "602"],
+      ["negative", "index", "last element", "list"]
+    ],
+    "mustNotMention": ["s-601", "0-indexing"]
+  }
+}
