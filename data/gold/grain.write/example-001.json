@@ -1,0 +1,57 @@
+{
+  "id": "example-001",
+  "scorer": "exactMatch",
+  "notes": "EXAMPLE, provided as a format reference. A student holds a wrong mental model of how a while loop terminates, then resolves it themselves with an analogy. Note that most of this conversation is noise: the greeting, the thanks, and the restatement of the lesson topic are all deliberately present, because an agent that extracts from them is over-extracting and we want that to be visible. Note also the classmate's name — a second child's data should not end up in this student's record.",
+  "input": {
+    "lesson": "Loops",
+    "existingGrains": [
+      { "text": "Confuses = and == in conditionals" }
+    ],
+    "turns": [
+      {
+        "student": "hi",
+        "tutor": "Hey! Ready to look at loops today?"
+      },
+      {
+        "student": "yeah. my while loop just keeps going forever and i don't know why",
+        "tutor": "Let's look at it together. What do you expect to happen to `i` as this runs?"
+      },
+      {
+        "student": "it goes up each time until the list is done right? i thought that's how it stops",
+        "tutor": "That's the key question. A while loop doesn't watch the list — it only checks the condition you wrote. Is anything in your code changing `i`?"
+      },
+      {
+        "student": "oh. no. nothing changes it",
+        "tutor": "That's a common one. The loop only stops when the condition becomes false, and nothing is making that happen yet."
+      },
+      {
+        "student": "ok i added i = i + 1 and it worked. it's like a clock hand, it only moves if something moves it",
+        "tutor": "That's a good way to put it. Nothing moves unless you move it."
+      },
+      {
+        "student": "jayden said loops were easy and i felt dumb but this makes sense now",
+        "tutor": "You worked it out yourself — that's the part that matters."
+      },
+      {
+        "student": "thanks!! bye",
+        "tutor": "See you next time."
+      }
+    ]
+  },
+  "expected": {
+    "grains": [
+      {
+        "text": "Believes a while loop terminates when the list is exhausted, rather than when its condition becomes false",
+        "type": "misconception"
+      },
+      {
+        "text": "Grasps loop increment when framed as a clock hand that only moves if something moves it",
+        "type": "unstuck"
+      },
+      {
+        "text": "Compares own pace unfavourably to classmates",
+        "type": "trait"
+      }
+    ]
+  }
+}

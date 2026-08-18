@@ -1,0 +1,18 @@
+{
+  "id": "example-001",
+  "scorer": "exactMatch",
+  "notes": "EXAMPLE. A student who has been away eight days and whose scores jumped when they returned. Two things are arguably true at once, which raises a question your scoring has to answer: if an agent finds one of two expected alerts, how much credit does it get? And is missing the disengagement alert as bad as inventing one that is not there? We do not think those are symmetric. Decide what you think and say so.",
+  "input": {
+    "studentId": "s-101",
+    "daysSinceActivity": 8,
+    "questionsAsked": 3,
+    "priorScores": [55, 60, 50],
+    "recentScores": [85, 90]
+  },
+  "expected": {
+    "alerts": [
+      { "type": "inactive", "severity": "medium" },
+      { "type": "breakthrough", "severity": "low" }
+    ]
+  }
+}

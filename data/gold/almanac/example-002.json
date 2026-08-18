@@ -1,0 +1,15 @@
+{
+  "id": "example-002",
+  "scorer": "exactMatch",
+  "notes": "EXAMPLE. A student asking a lot of questions while scoring well and staying active. Our reading is that this warrants no alert — asking six questions is not a problem when the answers are landing, and interrupting a teacher about it costs their attention for nothing. The stub disagrees, because it applies a fixed question threshold with no reference to whether the student is doing fine. You may reach a different conclusion; if you do, change the expectation and say why in your write-up. What you should not do is leave it as-is while quietly knowing you disagree.",
+  "input": {
+    "studentId": "s-102",
+    "daysSinceActivity": 1,
+    "questionsAsked": 6,
+    "priorScores": [78, 82],
+    "recentScores": [85, 88]
+  },
+  "expected": {
+    "alerts": []
+  }
+}

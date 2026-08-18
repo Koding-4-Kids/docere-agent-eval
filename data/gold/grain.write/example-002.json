@@ -1,0 +1,30 @@
+{
+  "id": "example-002",
+  "scorer": "exactMatch",
+  "notes": "EXAMPLE. A conversation that should produce NOTHING. There is no misconception, nothing was unstuck, and the only content is logistics and politeness. Cases like this are the most valuable ones in a gold standard and the easiest to forget to include — without them, nothing detects an agent that pads its output. Consider what your scoring method returns when both the expectation and the output are empty, and whether that is the answer you want.",
+  "input": {
+    "lesson": "Variables",
+    "existingGrains": [],
+    "turns": [
+      {
+        "student": "hey is this the same lesson as yesterday",
+        "tutor": "Not quite — yesterday was variables, today we build on them with types."
+      },
+      {
+        "student": "ok cool",
+        "tutor": "Ready when you are."
+      },
+      {
+        "student": "how long is this one",
+        "tutor": "About fifteen minutes."
+      },
+      {
+        "student": "ok thanks",
+        "tutor": "Let's get started."
+      }
+    ]
+  },
+  "expected": {
+    "grains": []
+  }
+}
