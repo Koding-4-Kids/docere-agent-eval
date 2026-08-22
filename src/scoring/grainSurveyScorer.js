@@ -1,20 +1,24 @@
 'use strict';
 
 /**
- * grainSurveyScorer
+ * grainSurveyScorer (v2.1)
  *
- * Multidimensional, cost-sensitive scorer for Grain.survey.
+ * Multidimensional, cost-sensitive scorer for Grain.survey with Citation Gating,
+ * Universal Distractor Verification, and Length Efficiency Penalties.
  *
- * Evaluates:
- *   1. Citation Accuracy: Precision-weighted F-beta (beta = 0.5) over canonical student IDs.
- *      Prioritizes Precision 2x over Recall to penalize falsely accusing innocent students.
- *   2. Empty Set & Abstention Verification: Zero-expected cases require explicit negative-state
- *      phrasing (e.g. "no students found", "none recorded") to receive citation credit.
- *      Silent answers or hallucinated citations receive 0.0.
- *   3. Pedagogical Text Assertions:
- *      - mustMention: Concept groups with synonym banks (evaluates coverage).
- *      - mustNotMention: Forbidden distractor IDs/terms (penalized with 1.5x penalty).
- *   4. Diagnostics: Detailed breakdown including token estimate and explanatory verdict.
+ * Core Principles:
+ *   1. Citation-Gated Formulation: Text scoring is strictly conditioned on citation success:
+ *        Score = citationScore * ((1 - textWeight) + textWeight * textScore) * lengthMultiplier
+ *      If an agent fails citations (citationScore = 0.0), the total score is strictly 0.0,
+ *      preventing agents from banking 0.35 for ungrounded keyword matching.
+ *   2. Asymmetric Precision Weighting: Precision is weighted 2x over Recall (beta = 0.5)
+ *      to heavily penalize misdiagnosing innocent students.
+ *   3. Universal Distractor Verification: mustNotMention and mustMention are evaluated across
+ *      ALL cases. On zero-expected cases, leaking a forbidden distractor invalidates abstention.
+ *   4. Length Efficiency Penalty: Proactively penalizes raw text dumping when output
+ *      significantly exceeds a realistic pedagogical summary length budget.
+ *   5. Negative-State Abstention Verification: Tight phrase bank ensuring empty citation
+ *      credit is only awarded when the agent explicitly states that no matching students were found.
  */
 
 const NEGATIVE_STATE_PHRASES = [
@@ -24,13 +28,14 @@ const NEGATIVE_STATE_PHRASES = [
   /\bempty classroom\b/i,
   /\bzero students\b/i,
   /\bnothing recorded\b/i,
-  /\bno one\b/i,
-  /\bno student\b/i,
-  /\bnone found\b/i,
+  /\bnothing found\b/i,
+  /\bno student recorded\b/i,
   /\bno struggling students\b/i,
   /\bno difficulties recorded\b/i,
   /\bno matching students\b/i,
-  /\bnothing\b/i,
+  /\bno students struggling\b/i,
+  /\bnone found with\b/i,
+  /\bthere is nothing recorded\b/i,
 ];
 
 function normalizeText(text) {
@@ -59,7 +64,43 @@ function score({ actual, expected, testCase }) {
     ? Math.ceil(answerText.trim().split(/\s+/).filter(Boolean).length * 1.33)
     : 0;
 
-  // 1. Citation extraction and canonicalization
+  // 1. Universal Distractor & Assertion Checking
+  const rawMustMention = Array.isArray(exp.mustMention) ? exp.mustMention : [];
+  const rawMustNotMention = Array.isArray(exp.mustNotMention) ? exp.mustNotMention : [];
+
+  let matchedGroupsCount = 0;
+  const matchedMentions = [];
+  const missedMentions = [];
+
+  if (rawMustMention.length === 0) {
+    matchedGroupsCount = 1;
+  } else {
+    for (const group of rawMustMention) {
+      const synonyms = Array.isArray(group) ? group : [group];
+      const matchedSynonym = synonyms.find(syn => matchesPattern(answerText, normalizedText, syn));
+      if (matchedSynonym) {
+        matchedGroupsCount++;
+        matchedMentions.push(synonyms[0]);
+      } else {
+        missedMentions.push(synonyms[0]);
+      }
+    }
+  }
+
+  const conceptCoverage = rawMustMention.length > 0 ? matchedGroupsCount / rawMustMention.length : 1.0;
+
+  const leakedDistractors = [];
+  for (const forbidden of rawMustNotMention) {
+    if (matchesPattern(answerText, normalizedText, forbidden)) {
+      leakedDistractors.push(forbidden);
+    }
+  }
+
+  const distractorLeaksCount = leakedDistractors.length;
+  const leakFraction = rawMustNotMention.length > 0 ? distractorLeaksCount / rawMustNotMention.length : 0.0;
+  const distractorPenaltyCoeff = typeof exp.distractorPenaltyCoeff === 'number' ? exp.distractorPenaltyCoeff : 1.5;
+
+  // 2. Citation extraction and canonicalization
   const actualCited = Array.isArray(act.citedStudentIds)
     ? [...new Set(act.citedStudentIds.map(String).map(s => s.trim()).filter(Boolean))]
     : [];
@@ -82,33 +123,22 @@ function score({ actual, expected, testCase }) {
   const beta = typeof exp.beta === 'number' ? exp.beta : 0.5;
   const betaSq = beta * beta;
 
-  const rawMustMention = Array.isArray(exp.mustMention) ? exp.mustMention : [];
-  const rawMustNotMention = Array.isArray(exp.mustNotMention) ? exp.mustNotMention : [];
-
-  let textScore = 0.0;
-  let conceptCoverage = 0.0;
-  const leakedDistractors = [];
-  const matchedMentions = [];
-  const missedMentions = [];
-
   if (expectedCited.length === 0) {
     if (actualCited.length === 0) {
-      // Empty expected & empty actual: verify explicit negative-state phrasing
-      abstentionVerified = NEGATIVE_STATE_PHRASES.some(p => p.test(answerText) || p.test(normalizedText));
+      // Empty expected & empty actual: verify explicit negative-state phrasing AND no distractor leaks
+      const hasNegativePhrase = NEGATIVE_STATE_PHRASES.some(p => p.test(answerText) || p.test(normalizedText));
+      abstentionVerified = hasNegativePhrase && distractorLeaksCount === 0;
+
       if (abstentionVerified) {
         precision = 1.0;
         recall = 1.0;
         f05 = 1.0;
         citationScore = 1.0;
-        conceptCoverage = 1.0;
-        textScore = 1.0;
       } else {
         precision = 0.0;
         recall = 0.0;
         f05 = 0.0;
         citationScore = 0.0;
-        conceptCoverage = 0.0;
-        textScore = 0.0;
       }
     } else {
       // Hallucinated citations on empty expectation
@@ -119,8 +149,6 @@ function score({ actual, expected, testCase }) {
       recall = 0.0;
       f05 = 0.0;
       citationScore = 0.0;
-      conceptCoverage = 0.0;
-      textScore = 0.0;
     }
   } else {
     // Non-empty expected citations
@@ -147,50 +175,47 @@ function score({ actual, expected, testCase }) {
       }
       citationScore = f05;
     }
-
-    // 2. Pedagogical Text Assertions (mustMention & mustNotMention)
-    let matchedGroupsCount = 0;
-    if (rawMustMention.length === 0) {
-      matchedGroupsCount = 1;
-    } else {
-      for (const group of rawMustMention) {
-        const synonyms = Array.isArray(group) ? group : [group];
-        const matchedSynonym = synonyms.find(syn => matchesPattern(answerText, normalizedText, syn));
-        if (matchedSynonym) {
-          matchedGroupsCount++;
-          matchedMentions.push(synonyms[0]);
-        } else {
-          missedMentions.push(synonyms[0]);
-        }
-      }
-    }
-
-    conceptCoverage = rawMustMention.length > 0 ? matchedGroupsCount / rawMustMention.length : 1.0;
-
-    for (const forbidden of rawMustNotMention) {
-      if (matchesPattern(answerText, normalizedText, forbidden)) {
-        leakedDistractors.push(forbidden);
-      }
-    }
-
-    const distractorLeaksCount = leakedDistractors.length;
-    const leakFraction = rawMustNotMention.length > 0 ? distractorLeaksCount / rawMustNotMention.length : 0.0;
-    const distractorPenaltyCoeff = typeof exp.distractorPenaltyCoeff === 'number' ? exp.distractorPenaltyCoeff : 1.5;
-    textScore = Math.max(0.0, conceptCoverage - (distractorPenaltyCoeff * leakFraction));
   }
 
-  // 3. Composite Output Score
+  // 3. Text Score Calculation
+  let baseTextScore = conceptCoverage;
+  if (expectedCited.length === 0 && !abstentionVerified) {
+    baseTextScore = 0.0;
+  }
+  const textScore = Math.max(0.0, baseTextScore - (distractorPenaltyCoeff * leakFraction));
+
+  // 4. Length Efficiency & Verbosity Penalty
+  // Target length budget: 120 tokens base + 40 tokens per cited student
+  const maxAllowedTokens = typeof exp.maxAllowedTokens === 'number'
+    ? exp.maxAllowedTokens
+    : Math.max(120, (expectedCited.length || 1) * 40 + 80);
+
+  let lengthMultiplier = 1.0;
+  if (tokenEstimate > maxAllowedTokens) {
+    const excessRatio = (tokenEstimate - maxAllowedTokens) / maxAllowedTokens;
+    lengthMultiplier = Math.max(0.4, 1.0 / (1.0 + 0.6 * excessRatio));
+  }
+
+  // 5. Citation-Gated Composite Score
+  // Text fidelity is conditioned on citation performance:
+  // If citationScore == 0, composite is strictly 0.0.
+  // If citationScore > 0, textScore scales the textWeight portion.
   const citationWeight = typeof exp.citationWeight === 'number' ? exp.citationWeight : 0.65;
   const textWeight = typeof exp.textWeight === 'number' ? exp.textWeight : 0.35;
 
-  const rawComposite = (citationWeight * citationScore) + (textWeight * textScore);
-  const finalScore = Number(Math.min(1.0, Math.max(0.0, rawComposite)).toFixed(4));
+  const gatedComposite = citationScore * ((1 - textWeight) + (textWeight * textScore));
+  const penalizedComposite = gatedComposite * lengthMultiplier;
+  const finalScore = Number(Math.min(1.0, Math.max(0.0, penalizedComposite)).toFixed(4));
 
   // Explanation string
   const explanations = [];
   if (expectedCited.length === 0) {
     if (actualCited.length === 0) {
-      explanations.push(abstentionVerified ? 'Correctly abstained with negative-state explanation.' : 'Empty citation without explicit negative-state phrasing.');
+      if (distractorLeaksCount > 0) {
+        explanations.push(`Abstention invalidated by distractor leak: [${leakedDistractors.join(', ')}].`);
+      } else {
+        explanations.push(abstentionVerified ? 'Correctly abstained with negative-state explanation.' : 'Empty citation without explicit negative-state phrasing.');
+      }
     } else {
       explanations.push(`Falsely cited ${actualCited.length} student(s) when 0 expected.`);
     }
@@ -198,11 +223,14 @@ function score({ actual, expected, testCase }) {
     explanations.push(`Citations: P=${precision.toFixed(2)}, R=${recall.toFixed(2)}, F0.5=${f05.toFixed(2)} (TP:${truePositives}, FP:${falsePositives}, FN:${falseNegatives}).`);
   }
 
-  if (rawMustMention.length > 0 && expectedCited.length > 0) {
+  if (rawMustMention.length > 0) {
     explanations.push(`Concept coverage: ${(conceptCoverage * 100).toFixed(0)}% (${matchedMentions.length}/${rawMustMention.length}).`);
   }
   if (leakedDistractors.length > 0) {
     explanations.push(`Distractor penalty: leaked [${leakedDistractors.join(', ')}].`);
+  }
+  if (lengthMultiplier < 0.98) {
+    explanations.push(`Verbosity penalty: ${tokenEstimate} tokens exceeds budget of ${maxAllowedTokens} (multiplier: ${lengthMultiplier.toFixed(2)}).`);
   }
 
   return {
@@ -215,11 +243,13 @@ function score({ actual, expected, testCase }) {
       falsePositives,
       falseNegatives,
       conceptCoverage: Number(conceptCoverage.toFixed(4)),
-      distractorLeaks: leakedDistractors.length,
+      distractorLeaks: distractorLeaksCount,
       leakedDistractors,
       matchedMentions,
       missedMentions,
       tokenEstimate,
+      maxAllowedTokens,
+      lengthMultiplier: Number(lengthMultiplier.toFixed(4)),
       textScore: Number(textScore.toFixed(4)),
       citationScore: Number(citationScore.toFixed(4)),
       abstentionVerified,
