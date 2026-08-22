@@ -1,14 +1,14 @@
 {
   "id": "example-001",
-  "scorer": "exactMatch",
-  "notes": "EXAMPLE. A teacher asks a targeted question about one concept. Two of the three students have relevant grains; the third's grain is about something else entirely and should not appear in a good answer. The output is free text, so exactMatch is hopeless here and any string-equality approach will be. This case exists to force the question: how do you score an answer where there is no single correct wording? Consider also what happens to this agent when a classroom has thirty students rather than three.",
+  "scorer": "grainSurveyScorer",
+  "notes": "Baseline case: Teacher asks a targeted question about loops. Students s-201 and s-203 have relevant loop misconceptions (termination model, range off-by-one). Student s-202 has an irrelevant conditional operator grain and must be excluded. Evaluates precision-weighted citation accuracy (F-0.5) and ensures s-202 is not leaked into the answer text.",
   "input": {
     "question": "Who is struggling with loops?",
     "students": [
       {
         "id": "s-201",
         "grains": [
-          { "text": "Believes a while loop terminates when the list is exhausted" }
+          { "text": "Believes a while loop terminates when the list is exhausted rather than when condition is false" }
         ]
       },
       {
@@ -27,7 +27,11 @@
   },
   "expected": {
     "citedStudentIds": ["s-201", "s-203"],
-    "answerMustMention": ["s-201", "s-203"],
-    "answerMustNotMention": ["s-202"]
+    "mustMention": [
+      ["s-201", "201"],
+      ["s-203", "203"],
+      ["loop", "while", "off-by-one", "range", "termination"]
+    ],
+    "mustNotMention": ["s-202", "conditionals"]
   }
 }

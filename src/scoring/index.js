@@ -25,8 +25,9 @@
  */
 
 const exactMatch = require('./exactMatch');
+const grainSurveyScorer = require('./grainSurveyScorer');
 
-const SCORERS = [exactMatch];
+const SCORERS = [exactMatch, grainSurveyScorer];
 
 function getScorer(id) {
   const scorer = SCORERS.find(s => s.id === id);

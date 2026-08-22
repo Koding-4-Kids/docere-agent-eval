@@ -1,0 +1,29 @@
+{
+  "id": "polarity-loop-mastery-003",
+  "scorer": "grainSurveyScorer",
+  "notes": "Contrastive Polarity Pair 2 (Mastery / Correct Definition): Student s-303 states that 'a while loop runs continuously as long as the condition evaluates to true'. This shares high lexical and vector overlap with loop confusion, but represents correct conceptual mastery. Student s-304 also mastered loop decrement. Neither student is struggling, so the expected citation set is empty and requires negative-state phrasing.",
+  "input": {
+    "question": "Which students are struggling with while loop termination?",
+    "students": [
+      {
+        "id": "s-303",
+        "grains": [
+          { "text": "Understands that a while loop runs continuously as long as the condition evaluates to true" }
+        ]
+      },
+      {
+        "id": "s-304",
+        "grains": [
+          { "text": "Correctly implemented loop decrement counter to terminate countdown" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": [],
+    "mustMention": [
+      ["no students", "none recorded", "no one", "zero students", "none found", "no matching students", "no struggling students"]
+    ],
+    "mustNotMention": ["s-303", "s-304"]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "id": "scale-small-5-007",
+  "scorer": "grainSurveyScorer",
+  "notes": "Scaling Baseline (5 students): 2 students (s-701, s-702) have operator confusion (= vs ==). The other 3 students have non-operator concepts. Evaluates baseline precision and recall in a small group setting.",
+  "input": {
+    "question": "Which students are confusing comparison and assignment operators?",
+    "students": [
+      {
+        "id": "s-701",
+        "grains": [
+          { "text": "Uses single = inside if condition check instead of ==" }
+        ]
+      },
+      {
+        "id": "s-702",
+        "grains": [
+          { "text": "Uses == to assign new value to variable" }
+        ]
+      },
+      {
+        "id": "s-703",
+        "grains": [
+          { "text": "Understands boolean truth tables and logical AND" }
+        ]
+      },
+      {
+        "id": "s-704",
+        "grains": [
+          { "text": "Trouble understanding nested function scope" }
+        ]
+      },
+      {
+        "id": "s-705",
+        "grains": [
+          { "text": "Mastered conditional if-else branches" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-701", "s-702"],
+    "mustMention": [
+      ["s-701", "701"],
+      ["s-702", "702"],
+      ["=", "==", "assignment", "comparison", "operator"]
+    ],
+    "mustNotMention": ["s-703", "s-704", "s-705", "scope"]
+  }
+}

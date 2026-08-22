@@ -1,0 +1,44 @@
+{
+  "id": "partial-overlap-multi-011",
+  "scorer": "grainSurveyScorer",
+  "notes": "Multi-Concept & Partial Overlap: Teacher asks about loop bounds and indexing difficulties. Students s-1101 (off-by-one in range bounds), s-1102 (1-based list indexing), and s-1103 (while loop condition timing) all fall within the query's scope. Student s-1104 mastered dictionaries and is a distractor.",
+  "input": {
+    "question": "Who has misconceptions regarding loop bounds, index offsets, or condition evaluation?",
+    "students": [
+      {
+        "id": "s-1101",
+        "grains": [
+          { "text": "Thinks range(1, 5) includes the number 5 (off-by-one upper bound)" }
+        ]
+      },
+      {
+        "id": "s-1102",
+        "grains": [
+          { "text": "Thinks list index starts at 1 instead of 0" }
+        ]
+      },
+      {
+        "id": "s-1103",
+        "grains": [
+          { "text": "Confused why while loop condition checks before body runs" }
+        ]
+      },
+      {
+        "id": "s-1104",
+        "grains": [
+          { "text": "Mastered dictionary key lookup syntax" }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "citedStudentIds": ["s-1101", "s-1102", "s-1103"],
+    "mustMention": [
+      ["s-1101", "1101"],
+      ["s-1102", "1102"],
+      ["s-1103", "1103"],
+      ["range", "bound", "index", "off-by-one", "while", "condition"]
+    ],
+    "mustNotMention": ["s-1104", "dictionary"]
+  }
+}

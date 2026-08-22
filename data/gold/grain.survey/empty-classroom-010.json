@@ -1,0 +1,16 @@
+{
+  "id": "empty-classroom-010",
+  "scorer": "grainSurveyScorer",
+  "notes": "Cold Start / Empty Classroom: The classroom contains zero registered students / no recorded grains. The agent must return an empty citation array and explicitly state in the answer that no student data or classroom records exist, rather than hallucinating or failing silently.",
+  "input": {
+    "question": "Who needs help with conditional statements?",
+    "students": []
+  },
+  "expected": {
+    "citedStudentIds": [],
+    "mustMention": [
+      ["empty classroom", "no students", "none recorded", "nothing recorded", "zero students", "nothing", "no data"]
+    ],
+    "mustNotMention": []
+  }
+}
