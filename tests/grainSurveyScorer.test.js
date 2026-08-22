@@ -45,6 +45,23 @@ test('grainSurveyScorer penalizes False Positives (over-citing) harder than Fals
   assert.ok(scoreFN > scoreFP, `Expected score with FN (${scoreFN}) to be higher than score with FP (${scoreFP}) under F-0.5`);
 });
 
+test('grainSurveyScorer strictly gates text score on citation success (zero citations = zero score)', () => {
+  // Agent writes correct keywords but failed to cite the required student
+  const result = scorer.score({
+    actual: {
+      citedStudentIds: [],
+      answer: 'Some students struggle with while loops and infinite loops and condition bounds.',
+    },
+    expected: {
+      citedStudentIds: ['s-201'],
+      mustMention: [['while', 'loop']],
+    },
+  });
+
+  assert.strictEqual(result.detail.citationScore, 0.0);
+  assert.strictEqual(result.score, 0.0, 'An agent that cites nobody on non-empty expected cases must receive 0.0');
+});
+
 test('grainSurveyScorer verifies negative-state phrasing on empty expectation', () => {
   // Good: Empty citations + explicit negative phrase -> 1.0
   const goodAbstain = scorer.score({
@@ -71,6 +88,43 @@ test('grainSurveyScorer verifies negative-state phrasing on empty expectation', 
   assert.strictEqual(hallucinated.detail.falsePositives, 1);
 });
 
+test('grainSurveyScorer executes mustNotMention distractor checks on zero-expected cases', () => {
+  const result = scorer.score({
+    actual: {
+      citedStudentIds: [],
+      answer: 'No students found. Also s-999 is terrible at everything.',
+    },
+    expected: {
+      citedStudentIds: [],
+      mustMention: [['no students', 'none']],
+      mustNotMention: ['s-999'],
+    },
+  });
+
+  assert.strictEqual(result.detail.distractorLeaks, 1);
+  assert.strictEqual(result.detail.textScore, 0.0);
+  assert.strictEqual(result.score, 0.0, 'Leaking a forbidden distractor on zero-expected case must drop score to 0');
+});
+
+test('grainSurveyScorer penalizes excessive verbosity and raw text dumping', () => {
+  const conciseAnswer = 'Students s-101 and s-102 struggle with loops.';
+  const verboseDump = 'Students s-101 and s-102 struggle with loops. ' + 'extra noise word '.repeat(200);
+
+  const conciseResult = scorer.score({
+    actual: { citedStudentIds: ['s-101', 's-102'], answer: conciseAnswer },
+    expected: { citedStudentIds: ['s-101', 's-102'], mustMention: [['loop']] },
+  });
+
+  const verboseResult = scorer.score({
+    actual: { citedStudentIds: ['s-101', 's-102'], answer: verboseDump },
+    expected: { citedStudentIds: ['s-101', 's-102'], mustMention: [['loop']] },
+  });
+
+  assert.strictEqual(conciseResult.score, 1.0);
+  assert.ok(verboseResult.detail.lengthMultiplier < 0.80, `Length multiplier (${verboseResult.detail.lengthMultiplier}) should penalize excessive length`);
+  assert.ok(verboseResult.score < conciseResult.score, 'Excessive verbosity dump should score lower than concise answer');
+});
+
 test('grainSurveyScorer handles concept synonym groups and distractor leak penalties', () => {
   const result = scorer.score({
     actual: {
@@ -92,7 +146,7 @@ test('grainSurveyScorer handles concept synonym groups and distractor leak penal
   assert.strictEqual(result.detail.conceptCoverage, 1.0); // both concept groups matched
   assert.strictEqual(result.detail.distractorLeaks, 2); // s-102 and syntax leaked
   assert.strictEqual(result.detail.textScore, 0.0); // 1.0 - 1.5*(2/2) = 0.0
-  assert.strictEqual(result.score, 0.5); // 0.5*1.0 + 0.5*0.0
+  assert.strictEqual(result.score, 0.5); // 1.0 * (0.5 + 0.5*0.0)
 });
 
 test('grainSurveyScorer is resilient against malformed and unexpected inputs', () => {
