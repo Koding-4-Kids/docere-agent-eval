@@ -27,6 +27,17 @@ const { getScorer } = require('./scoring');
 
 const GOLD_ROOT = path.join(__dirname, '..', 'data', 'gold');
 
+function describeError(err) {
+  try {
+    if (typeof err?.message === 'string' && err.message) return err.message;
+    const description = String(err);
+    if (description) return description;
+  } catch {
+    // Thrown objects can also fail during property access or string conversion.
+  }
+  return 'Agent threw without an error message';
+}
+
 function loadCases(agentId) {
   const dir = path.join(GOLD_ROOT, agentId);
   if (!fs.existsSync(dir)) return [];
@@ -53,18 +64,13 @@ async function evaluateAgent(agentId) {
   const results = [];
   for (const testCase of cases) {
     let actual = null;
-    let error = null;
 
     try {
       actual = await agent.run(testCase.input);
     } catch (err) {
-      error = err.message;
-    }
-
-    if (error) {
       // An agent that throws scores zero rather than halting the run — one bad
       // case should not hide the results of every other case.
-      results.push({ id: testCase.id, score: 0, error, file: testCase._file });
+      results.push({ id: testCase.id, score: 0, error: describeError(err), file: testCase._file });
       continue;
     }
 
